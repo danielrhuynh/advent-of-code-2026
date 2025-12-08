@@ -15,6 +15,7 @@ func main() {
 		// Assuming we have our input in matrix form already
 		// Keep track of indices where a beam should be to determine if a beam coincides with a splitter
 		// beams = [i_0, ..., i_n]
+		// We actually need to use a set or something unique here such that we dont count the same beam twice
 		// for j in range of cols:
 			// If input[i][j] == "^"
 			// beams.append(i-1)
@@ -33,19 +34,14 @@ func main() {
 		}
 	}
 
-	// cols := len(input[0])
 	rows := len(input)
-	// beams := []int{} // Use a set
-	// beams = append(beams, sIndex)
+	cols := len(input[0])
 	beams := map[int]struct{}{}
 	beams[sIndex] = struct{}{}
 	res := 0
 	for j:=0; j<rows; j++ {
 		for k := range beams {
 			if input[j][k] == "^" {
-				// check for index in slice here
-				// beams = append(beams, i-1)
-				// beams = append(beams, i+1)
 				beams[k-1] = struct{}{}
 				beams[k+1] = struct{}{}
 				delete(beams, k)
@@ -55,4 +51,51 @@ func main() {
 	}
 
 	fmt.Println(res)
+
+	// Part 2:
+		// This is idealistically 2^splits but not in practice
+		// Write a dfs where we count the amount of times we finish the frame... fuck
+		// dfs(i, j):
+			// Base case:
+			// if j > rows:
+				// res += 1
+				// return
+			// if input[i][j] == "^":
+				// dfs(i-1, j+1)
+				// dfs(i+1, j+1)
+			// else:
+				// dfs(i, j+1)
+
+	// We need to memoize our input since this takes way too long to run (omg I get to use DP)
+	timelines := 0
+	cache := make([][]int, rows+1)
+	for i := 0; i <= rows; i++ {
+		cache[i] = make([]int, cols)
+		for j := 0; j < cols; j++ {
+			cache[i][j] = -1
+		}
+	}
+
+	var dfs func(i int, j int) int
+	 dfs = func(i int, j int) int {
+		if i >= rows {
+			return 1
+		}
+		if cache[i][j] != -1 {
+        	return cache[i][j]
+    	}
+		var res int
+		if input[i][j] == "^" {
+			res = dfs(i+1, j+1) + dfs(i+1, j-1)
+		} else {
+			res = dfs(i+1, j)
+		}
+		cache[i][j] = res
+		return res
+	}
+
+	timelines = dfs(0, sIndex)
+	fmt.Println(timelines)
 }
+
+
