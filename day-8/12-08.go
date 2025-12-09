@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	rawInput, err := utils.ComsumeInputNewLines("day-8/test.txt")
+	rawInput, err := utils.ComsumeInputNewLines("day-8/input.txt")
 	if err != nil {
 		fmt.Println("main: error consuming input")
 	}
@@ -26,9 +26,7 @@ func main() {
 		}
 		input = append(input, types.XYZ{X: x, Y: y, Z: z})
 	}
-	fmt.Println(input)
 
-	// var straightLineDistance func(x int, y int, z int)
 	straightLineDistance := func(p1 types.XYZ, p2 types.XYZ) float64{
 		dx := float64(p1.X - p2.X)
 		dy := float64(p1.Y - p2.Y)
@@ -44,22 +42,23 @@ func main() {
 		}
 	}
 
+	// I got stuck about here and had to learn about a bunch of shit. See Obsidian.
+	// Implementing Kruskal's algorithm (DSU's and min spanning trees)
+
 	sort.Slice(edges, func(i, j int) bool {
 		return edges[i].Dist < edges[j].Dist
 	})
 
 	dsu := types.InitDSU(len(input))
-	maxEdges := 10
-	// maxEdges := 1000
+	// maxEdges := 10
+	maxEdges := 1000
 	if maxEdges > len(edges) {
 		maxEdges = len(edges)
 	}
 
 	for i:=0; i<maxEdges; i++ {
 		e := edges[i]
-		merged, newSize := dsu.Union(e.I, e.J)
-		fmt.Println(merged)
-		fmt.Println(newSize)
+		dsu.Union(e.I, e.J)
 	}
 
 	sizes := []int{}
@@ -68,10 +67,27 @@ func main() {
         	sizes = append(sizes, dsu.Size[i])
     	}
 	}
-	fmt.Println(sizes)
 	sort.Ints(sizes)
 	k := len(sizes)
 	product := sizes[k-1] * sizes[k-2] * sizes[k-3]
 	fmt.Println(product)
+
+	// Part 2:
+		// Basically we want to redo union on a new DSU and instead of stopping at 10 or 1000, we keep going until we merge everything under one root
+		// On each iteration, we would keep track of the last edge
+		// Once we stop, look up the points of the edge and multiply their X components
+	dsuPart2 := types.InitDSU(len(input))
+	var lastEdge = types.Edge{}
+	for _, e := range edges {
+		merged, size := dsuPart2.Union(e.I, e.J)
+		if merged {
+			lastEdge = e
+			if size == len(input) {
+				break
+			}
+		}
+	}
+	res2 := input[lastEdge.I].X * input[lastEdge.J].X
+	fmt.Println(res2)
 
 }
