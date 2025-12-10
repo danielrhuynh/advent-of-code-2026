@@ -89,5 +89,4 @@ func main() {
 	}
 	res2 := input[lastEdge.I].X * input[lastEdge.J].X
 	fmt.Println(res2)
-
 }
