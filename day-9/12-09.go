@@ -108,7 +108,7 @@ func main() {
 
 				// Are we valid for any band?
 				ok := false
-				for j:=0; j+1<len(ys); j+=2 {
+				for j:=0; j<=len(ys); j+=2 {
 					if min(p1.Y, p2.Y) >= intersections[x][j] && max(p1.Y, p2.Y) <= intersections[x][j+1] {
 						ok = true
 						break
